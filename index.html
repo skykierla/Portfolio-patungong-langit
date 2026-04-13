@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kier Larga — Virtual Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet" />
+<style>
+  /* ─── TOKENS ─────────────────────────────────────────────── */
+  :root {
+    --sand:    #F4EDE4;
+    --ocean:   #0A2540;
+    --sea:     #3A6EA5;
+    --sky:     #A9C5D3;
+    --accent:  #E6B17E;
+    --highlight: #FFD6A5;
+    --white:   #FFFFFF;
+    --muted:   #7A8FA6;
+
+    --serif:   'Cormorant Garamond', Georgia, serif;
+    --display: 'Playfair Display', serif;
+    --sans:    'DM Sans', system-ui, sans-serif;
+
+    --radius:  20px;
+    --ease:    cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ─── RESET ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: var(--sans);
+    background: var(--sand);
+    color: var(--ocean);
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { text-decoration: none; color: inherit; }
+
+  /* ─── NOISE OVERLAY ──────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ─── UTILITY ────────────────────────────────────────────── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.03em;
+    background: var(--white); color: var(--ocean);
+    box-shadow: 0 2px 12px rgba(10,37,64,.08);
+  }
+  .pill--accent { background: var(--accent); color: var(--white); }
+  .pill--sea    { background: var(--sea);    color: var(--white); }
+  .pill--sky    { background: var(--sky);    color: var(--ocean); }
+
+  .section-label {
+    font-family: var(--sans);
+    font-size: 0.7rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ─── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(244,237,228,0.8);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(10,37,64,0.06);
+    transition: all 0.4s var(--ease);
+  }
+  nav.scrolled {
+    padding: 14px 48px;
+    box-shadow: 0 4px 30px rgba(10,37,64,.06);
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.3rem; font-weight: 600;
+    color: var(--ocean); letter-spacing: 0.02em;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    font-size: 0.82rem; font-weight: 500; letter-spacing: 0.05em;
+    color: var(--ocean); opacity: 0.7;
+    transition: opacity 0.25s;
+    text-transform: uppercase;
+  }
+  .nav-links a:hover { opacity: 1; }
+  .nav-cta {
+    padding: 10px 24px; border-radius: 100px;
+    background: var(--ocean); color: var(--sand);
+    font-size: 0.8rem; font-weight: 500;
+    transition: background 0.25s, transform 0.2s;
+  }
+  .nav-cta:hover { background: var(--sea); transform: translateY(-1px); }
+
+  /* ─── HERO ───────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    background: var(--ocean);
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, rgba(10,37,64,0.92) 0%, rgba(58,110,165,0.7) 60%, rgba(169,197,211,0.4) 100%),
+      var(--ocean);
+    z-index: 0;
+  }
+  .hero-bg-img {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    z-index: -1;
+    opacity: 0.5;
+    filter: saturate(0.6);
+    transition: opacity 0.5s;
+  }
+
+  .hero-wordmark {
+    position: absolute; top: 50%; left: -20px;
+    transform: translateY(-50%);
+    font-family: var(--display);
+    font-size: clamp(120px, 18vw, 240px);
+    font-weight: 900; line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(169,197,211,0.18);
+    letter-spacing: -0.04em;
+    pointer-events: none; user-select: none;
+    z-index: 1;
+    white-space: nowrap;
+  }
+
+  .hero-left {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 140px 64px 80px 64px;
+  }
+  .hero-eyebrow {
+    display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .hero-name {
+    font-family: var(--display);
+    font-size: clamp(42px, 6vw, 86px);
+    font-weight: 900; line-height: 1.02;
+    color: var(--sand);
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .hero-name em { color: var(--accent); font-style: italic; }
+  .hero-tagline {
+    font-family: var(--serif);
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--sky); font-weight: 300; font-style: italic;
+    margin-bottom: 36px; line-height: 1.5;
+  }
+  .hero-intro {
+    font-size: 0.92rem; line-height: 1.7;
+    color: rgba(244,237,228,0.7); max-width: 360px;
+    margin-bottom: 48px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    padding: 14px 36px; border-radius: 100px;
+    background: var(--accent); color: var(--white);
+    font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.3s var(--ease);
+    box-shadow: 0 8px 32px rgba(230,177,126,0.4);
+  }
+  .btn-primary:hover { background: var(--highlight); color: var(--ocean); transform: translateY(-2px); box-shadow: 0 14px 40px rgba(230,177,126,0.5); }
+  .btn-ghost {
+    padding: 14px 36px; border-radius: 100px;
+    border: 1.5px solid rgba(169,197,211,0.4); color: var(--sky);
+    font-size: 0.85rem; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.3s var(--ease);
+  }
+  .btn-ghost:hover { border-color: var(--sky); background: rgba(169,197,211,0.1); }
+
+  .hero-right {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-end;
+    padding: 140px 64px 80px 0;
+  }
+  .hero-photo-wrap {
+    position: relative;
+    width: 100%; max-width: 460px;
+  }
+  .hero-photo-frame {
+    width: 100%; aspect-ratio: 3/4;
+    border-radius: 24px 24px 120px 24px;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--sea) 0%, var(--ocean) 100%);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(169,197,211,0.12);
+    position: relative;
+  }
+  .hero-photo-frame img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center;
+  }
+  .hero-photo-placeholder {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    color: rgba(169,197,211,0.5);
+  }
+  .hero-photo-placeholder span { font-size: 4rem; }
+  .hero-photo-placeholder p { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+
+  .hero-float-card {
+    position: absolute;
+    background: rgba(244,237,228,0.95);
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    font-size: 0.78rem;
+  }
+  .hero-float-card.card-tl {
+    top: -20px; left: -40px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-float-card.card-br {
+    bottom: 40px; right: -30px;
+    text-align: right;
+  }
+  .float-icon { font-size: 1.4rem; }
+  .float-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .float-value { font-weight: 600; color: var(--ocean); font-size: 0.85rem; }
+
+  /* scroll indicator */
+  .scroll-cta {
+    position: absolute; bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: float 3s ease-in-out infinite;
+  }
+  .scroll-circle {
+    width: 54px; height: 54px; border-radius: 50%;
+    border: 1.5px solid rgba(169,197,211,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sky); font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .scroll-circle:hover { background: rgba(169,197,211,0.15); border-color: var(--sky); }
+  .scroll-text { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: rgba(169,197,211,0.6); }
+  @keyframes float { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+
+  /* ─── DIVIDER ────────────────────────────────────────────── */
+  .wave-divider {
+    width: 100%; overflow: hidden;
+    line-height: 0; background: var(--ocean);
+  }
+  .wave-divider svg { display: block; width: 100%; }
+
+  /* ─── ABOUT ──────────────────────────────────────────────── */
+  #about {
+    padding: 120px 64px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+    background: var(--sand);
+    position: relative;
+  }
+  #about::before {
+    content: '"';
+    position: absolute; top: 40px; right: 80px;
+    font-family: var(--display); font-size: 300px; line-height: 1;
+    color: rgba(58,110,165,0.05); pointer-events: none;
+  }
+  .about-left { position: relative; }
+  .about-img-wrap {
+    position: relative; width: 100%; max-width: 480px;
+  }
+  .about-img-frame {
+    width: 100%; aspect-ratio: 4/5;
+    border-radius: 12px 120px 12px 12px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--sky) 0%, var(--sea) 100%);
+    box-shadow: 20px 20px 60px rgba(10,37,64,0.12);
+  }
+  .about-img-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .about-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px;
+    color: rgba(10,37,64,0.3);
+  }
+  .about-img-placeholder span { font-size: 3rem; }
+  .about-accent-box {
+    position: absolute; bottom: -20px; right: -20px;
+    background: var(--accent); border-radius: 16px;
+    padding: 20px 24px; color: var(--white);
+    box-shadow: 0 12px 40px rgba(230,177,126,0.35);
+  }
+  .accent-box-num { font-family: var(--display); font-size: 2.2rem; font-weight: 700; line-height: 1; }
+  .accent-box-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.85; }
+
+  .about-right {}
+  .about-eyebrow { margin-bottom: 16px; }
+  .about-headline {
+    font-family: var(--display);
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 700; line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ocean); margin-bottom: 24px;
+  }
+  .about-headline em { color: var(--sea); font-style: italic; }
+  .about-text {
+    font-size: 1rem; line-height: 1.8;
+    color: rgba(10,37,64,0.72); margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .about-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+  .about-tag {
+    background: var(--white);
+    border: 1px solid rgba(10,37,64,0.08);
+    border-radius: 12px; padding: 10px 16px;
+    display: flex; flex-direction: column; gap: 2px;
+    box-shadow: 0 2px 8px rgba(10,37,64,0.05);
+  }
+  .about-tag-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .about-tag-value { font-size: 0.85rem; font-weight: 600; color: var(--ocean); }
+
+  /* ─── SERVICES ───────────────────────────────────────────── */
+  #services {
+    padding: 120px 64px;
+    background: var(--ocean);
+    position: relative; overflow: hidden;
+  }
+  #services::before {
+    content: 'SERVICES';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    font-family: var(--display); font-size: clamp(80px, 14vw, 180px);
+    font-weight: 900; color: transparent;
+    -webkit-text-stroke: 1px rgba(169,197,211,0.06);
+    white-space: nowrap; pointer-events: none;
+  }
+  .services-header {
+    text-align: center; margin-bottom: 72px; position: relative; z-index: 1;
+  }
+  .services-label { color: var(--sky); margin-bottom: 16px; }
+  .services-headline {
+    font-family: var(--display);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 700; color: var(--sand); line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .services-headline em { color: var(--accent); font-style: italic; }
+  .services-sub {
+    font-size: 1rem; color: rgba(169,197,211,0.7); margin-top: 16px;
+    font-weight: 300; max-width: 500px; margin-left: auto; margin-right: auto;
+    line-height: 1.7;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    position: relative; z-index: 1;
+  }
+  .service-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(169,197,211,0.1);
+    border-radius: 20px; padding: 36px 32px;
+    transition: all 0.4s var(--ease);
+    cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--sea));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s var(--ease);
+  }
+  .service-card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(169,197,211,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-icon {
+    font-size: 2.2rem; margin-bottom: 18px;
+    display: block; line-height: 1;
+  }
+  .service-number {
+    position: absolute; top: 28px; right: 28px;
+    font-family: var(--display); font-size: 3rem; font-weight: 700;
+    color: rgba(169,197,211,0.06); line-height: 1;
+  }
+  .service-title {
+    font-family: var(--serif);
+    font-size: 1.35rem; font-weight: 600;
+    color: var(--sand); margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .service-desc {
+    font-size: 0.88rem; line-height: 1.75;
+    color: rgba(169,197,211,0.65); font-weight: 300;
+  }
+
+  /* ─── SKILLS ─────────────────────────────────────────────── */
+  #skills {
+    padding: 120px 64px;
+    background: var(--sand);
+  }
+  .skills-inner {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: start;
+  }
+  .skills-header { margin-bottom: 48px; }
+  .skills-headline {
+    font-family: var(--display);
+    font-size: clamp(36px, 4.5vw, 54px);
+    font-weight: 700; letter-spacing: -0.03em;
+    color: var(--ocean); line-height: 1.1;
+  }
+  .skills-headline em { color: var(--sea); font-style: italic; }
+  .skills-subtext {
+    font-size: 0.95rem; line-height: 1.7; color: rgba(10,37,64,0.6);
+    margin-top: 14px; font-weight: 300;
+  }
+
+  .skills-section { margin-bottom: 48px; }
+  .skills-section-title {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--muted); margin-bottom: 18px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .skills-section-title::after {
+    content: ''; flex: 1; height: 1px; background: rgba(10,37,64,0.1);
+  }
+  .pills-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+  .skill-pill {
+    padding: 8px 18px; border-radius: 100px;
+    font-size: 0.82rem; font-weight: 500;
+    border: 1px solid rgba(10,37,64,0.12);
+    background: var(--white);
+    color: var(--ocean);
+    transition: all 0.25s;
+    cursor: default;
+  }
+  .skill-pill:hover { background: var(--ocean); color: var(--sand); border-color: var(--ocean); }
+  .skill-pill.tool { background: rgba(58,110,165,0.08); border-color: rgba(58,110,165,0.2); color: var(--sea); }
+  .skill-pill.tool:hover { background: var(--sea); color: var(--white); border-color: var(--sea); }
+
+  .skills-visual {
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .skill-bar-item {}
+  .skill-bar-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .skill-bar-name { font-size: 0.88rem; font-weight: 500; color: var(--ocean); }
+  .skill-bar-pct { font-size: 0.78rem; color: var(--muted); font-family: var(--serif); }
+  .skill-bar-track {
+    height: 6px; border-radius: 100px;
+    background: rgba(10,37,64,0.08); overflow: hidden;
+  }
+  .skill-bar-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--sea), var(--accent));
+    width: 0%;
+    transition: width 1.2s var(--ease);
+  }
+
+  /* ─── GALLERY ────────────────────────────────────────────── */
+  #gallery {
+    padding: 120px 64px;
+    background: linear-gradient(180deg, var(--ocean) 0%, #0d2f50 100%);
+  }
+  .gallery-header { text-align: center; margin-bottom: 64px; }
+  .gallery-headline {
+    font-family: var(--display);
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 700; color: var(--sand); letter-spacing: -0.03em;
+  }
+  .gallery-headline em { color: var(--accent); font-style: italic; }
+  .gallery-sub { color: rgba(169,197,211,0.65); margin-top: 12px; font-weight: 300; }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+    gap: 16px;
+  }
+  .gallery-item {
+    position: relative; overflow: hidden; border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(169,197,211,0.08);
+    cursor: pointer;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+  .gallery-item:hover { transform: scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.4); z-index: 2; }
+  .gallery-item:nth-child(1) { grid-column: 1/6; grid-row: 1/2; aspect-ratio: 4/3; }
+  .gallery-item:nth-child(2) { grid-column: 6/9; grid-row: 1/2; aspect-ratio: 3/4; }
+  .gallery-item:nth-child(3) { grid-column: 9/13; grid-row: 1/2; aspect-ratio: 4/3; }
+  .gallery-item:nth-child(4) { grid-column: 1/7; grid-row: 2/3; aspect-ratio: 16/9; }
+  .gallery-item:nth-child(5) { grid-column: 7/13; grid-row: 2/3; aspect-ratio: 16/9; }
+  .gallery-img { width: 100%; height: 100%; object-fit: cover; }
+  .gallery-placeholder {
+    width: 100%; height: 100%; min-height: 200px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: rgba(169,197,211,0.25); gap: 8px;
+    background: linear-gradient(135deg, rgba(58,110,165,0.08) 0%, rgba(10,37,64,0.4) 100%);
+  }
+  .gallery-placeholder span { font-size: 2.5rem; }
+  .gallery-placeholder p { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .gallery-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 16px; background: linear-gradient(transparent, rgba(10,37,64,0.8));
+    color: var(--sand); font-size: 0.78rem; font-weight: 500;
+    transform: translateY(100%); transition: transform 0.3s var(--ease);
+  }
+  .gallery-item:hover .gallery-caption { transform: translateY(0); }
+
+  /* ─── CONTACT ────────────────────────────────────────────── */
+  #contact {
+    padding: 120px 64px;
+    background: var(--sand);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+  }
+  .contact-left {}
+  .contact-label { margin-bottom: 16px; }
+  .contact-headline {
+    font-family: var(--display);
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;
+    color: var(--ocean); margin-bottom: 20px;
+  }
+  .contact-headline em { color: var(--sea); font-style: italic; }
+  .contact-sub { font-size: 1rem; line-height: 1.8; color: rgba(10,37,64,0.65); font-weight: 300; margin-bottom: 40px; }
+  .contact-items { display: flex; flex-direction: column; gap: 18px; }
+  .contact-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 22px; background: var(--white); border-radius: 14px;
+    border: 1px solid rgba(10,37,64,0.08);
+    transition: all 0.3s var(--ease);
+    text-decoration: none; color: inherit;
+  }
+  .contact-item:hover { border-color: var(--sea); box-shadow: 0 8px 32px rgba(58,110,165,0.1); transform: translateX(4px); }
+  .contact-item-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(58,110,165,0.1); color: var(--sea);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .contact-item-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .contact-item-value { font-size: 0.92rem; font-weight: 500; color: var(--ocean); }
+
+  .contact-right {}
+  .contact-card {
+    background: var(--ocean); border-radius: 28px;
+    padding: 56px 48px;
+    box-shadow: 0 30px 80px rgba(10,37,64,0.2);
+    position: relative; overflow: hidden;
+  }
+  .contact-card::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(230,177,126,0.15), transparent);
+  }
+  .contact-card::after {
+    content: '';
+    position: absolute; bottom: -40px; left: -40px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(58,110,165,0.2), transparent);
+  }
+  .contact-card-eyebrow { color: var(--accent); margin-bottom: 20px; }
+  .contact-card-title {
+    font-family: var(--display);
+    font-size: 2rem; font-weight: 700; color: var(--sand);
+    line-height: 1.2; margin-bottom: 16px;
+  }
+  .contact-card-text { font-size: 0.9rem; color: rgba(169,197,211,0.7); line-height: 1.7; margin-bottom: 36px; font-weight: 300; }
+  .contact-form-field {
+    margin-bottom: 16px;
+  }
+  .contact-form-field input,
+  .contact-form-field textarea {
+    width: 100%; padding: 14px 18px; border-radius: 12px;
+    border: 1px solid rgba(169,197,211,0.15);
+    background: rgba(255,255,255,0.05);
+    color: var(--sand); font-family: var(--sans); font-size: 0.88rem;
+    outline: none; transition: border-color 0.25s;
+    resize: none;
+  }
+  .contact-form-field input::placeholder,
+  .contact-form-field textarea::placeholder { color: rgba(169,197,211,0.35); }
+  .contact-form-field input:focus,
+  .contact-form-field textarea:focus { border-color: rgba(169,197,211,0.4); }
+  .contact-form-field textarea { min-height: 100px; }
+  .contact-submit {
+    width: 100%; padding: 16px;
+    border-radius: 100px; border: none; cursor: pointer;
+    background: var(--accent); color: var(--white);
+    font-size: 0.88rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    font-family: var(--sans);
+    transition: all 0.3s var(--ease);
+    box-shadow: 0 8px 32px rgba(230,177,126,0.3);
+  }
+  .contact-submit:hover { background: var(--highlight); color: var(--ocean); transform: translateY(-2px); }
+
+  /* ─── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    background: var(--ocean);
+    padding: 48px 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 20px;
+  }
+  .footer-logo { font-family: var(--serif); font-size: 1.2rem; color: var(--sand); }
+  .footer-copy { font-size: 0.78rem; color: rgba(169,197,211,0.5); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 0.78rem; color: rgba(169,197,211,0.5); transition: color 0.25s; }
+  .footer-links a:hover { color: var(--sky); }
+
+  /* ─── REVEAL ANIMATION ───────────────────────────────────── */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 120px 32px 80px; }
+    .hero-wordmark { font-size: 80px; }
+    #about, #contact { grid-template-columns: 1fr; gap: 48px; padding: 80px 32px; }
+    .about-left { display: none; }
+    #services, #skills, #gallery { padding: 80px 32px; }
+    .skills-inner { grid-template-columns: 1fr; gap: 40px; }
+    .gallery-grid { grid-template-columns: 1fr 1fr; }
+    .gallery-item { grid-column: auto !important; grid-row: auto !important; aspect-ratio: 4/3 !important; }
+    footer { flex-direction: column; text-align: center; padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo" id="nav-logo"> Kier Larga</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Hire Me</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="hero-bg-img" id="hero-bg-img"></div>
+  </div>
+  <div class="hero-wordmark">PORTFOLIO</div>
+
+  <div class="hero-left">
+    <div class="hero-eyebrow reveal">
+      <span class="pill">✦ Virtual Assistant</span>
+      <span class="pill pill--accent">Available for Work</span>
+    </div>
+    <h1 class="hero-name reveal reveal-delay-1">
+      <em id="hero-nickname">Kier</em><br>Larga
+    </h1>
+    <p class="hero-tagline reveal reveal-delay-2" id="hero-tagline">Virtual Assistant & Customer Support Specialist</p>
+    <p class="hero-intro reveal reveal-delay-3" id="hero-intro">Turning chaos into clarity — one inbox, calendar, and client at a time.</p>
+    <div class="hero-actions reveal reveal-delay-4">
+      <a href="#contact" class="btn-primary">Work With Me</a>
+      <a href="#services" class="btn-ghost">View Services</a>
+    </div>
+  </div>
+
+  <div class="hero-right reveal reveal-delay-2">
+    <div class="hero-photo-wrap">
+      <div class="hero-float-card card-tl">
+        <span class="float-icon">📍</span>
+        <div>
+          <div class="float-label">Based in</div>
+          <div class="float-value" id="hero-location">Antipolo City, PH</div>
+        </div>
+      </div>
+      <div class="hero-photo-frame" id="hero-photo-frame">
+        <div class="hero-photo-placeholder">
+          <span>👤</span>
+          <p>Upload Profile Photo</p>
+        </div>
+      </div>
+      <div class="hero-float-card card-br">
+        <div class="float-label">Experience</div>
+        <div class="float-value">1.5+ Years</div>
+        <div class="float-label" style="margin-top:4px">Customer Support</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cta" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
+    <div class="scroll-circle">↓</div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,60 C360,0 1080,0 1440,60 L1440,0 L0,0 Z" fill="#0A2540"/>
+    <path d="M0,60 C360,20 1080,20 1440,60 L1440,60 L0,60 Z" fill="#F4EDE4"/>
+  </svg>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left reveal">
+    <div class="about-img-wrap">
+      <div class="about-img-frame" id="about-photo-frame">
+        <div class="about-img-placeholder">
+          <span>🌊</span>
+          <p>About Photo</p>
+        </div>
+      </div>
+      <div class="about-accent-box">
+        <div class="accent-box-num">1.5+</div>
+        <div class="accent-box-label">Years of Excellence</div>
+      </div>
+    </div>
+  </div>
+  <div class="about-right">
+    <div class="section-label about-eyebrow reveal">— About Me</div>
+    <h2 class="about-headline reveal reveal-delay-1" id="about-headline">Hello, you can call me <em>Sky.</em></h2>
+    <p class="about-text reveal reveal-delay-2" id="about-text">I'm a dedicated Virtual Assistant and Customer Support Specialist with over 1 year and 7 months of hands-on experience. I help entrepreneurs and businesses run smoother by taking care of the behind-the-scenes work — so you can focus on what truly matters. From inbox zero to flawlessly managed calendars, I bring precision, warmth, and a can-do attitude to every task.</p>
+    <div class="about-tags reveal reveal-delay-3" id="about-tags">
+      <div class="about-tag">
+        <span class="about-tag-label">Nationality</span>
+        <span class="about-tag-value">🇵🇭 Filipino</span>
+      </div>
+      <div class="about-tag">
+        <span class="about-tag-label">Based in</span>
+        <span class="about-tag-value">📍 Antipolo City</span>
+      </div>
+      <div class="about-tag">
+        <span class="about-tag-label">Experience</span>
+        <span class="about-tag-value">💼 1.5+ Years</span>
+      </div>
+      <div class="about-tag">
+        <span class="about-tag-label">Languages</span>
+        <span class="about-tag-value">🌐 EN & FIL</span>
+      </div>
+    </div>
+    <a href="#contact" class="btn-primary reveal reveal-delay-4" style="display:inline-block">Let's Connect</a>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header">
+    <div class="section-label services-label reveal">— What I Offer</div>
+    <h2 class="services-headline reveal reveal-delay-1">My <em>Services</em></h2>
+    <p class="services-sub reveal reveal-delay-2">Premium virtual assistance tailored to keep your business and life running beautifully.</p>
+  </div>
+  <div class="services-grid" id="services-grid"></div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="skills-inner">
+    <div>
+      <div class="skills-header">
+        <div class="section-label reveal">— Expertise</div>
+        <h2 class="skills-headline reveal reveal-delay-1">Tools &<br><em>Soft Skills</em></h2>
+        <p class="skills-subtext reveal reveal-delay-2">A well-rounded toolkit built for modern remote work — technical proficiency meets genuine human connection.</p>
+      </div>
+      <div class="skills-section reveal reveal-delay-2">
+        <div class="skills-section-title">Tools & Software</div>
+        <div class="pills-wrap" id="tools-pills"></div>
+      </div>
+      <div class="skills-section reveal reveal-delay-3">
+        <div class="skills-section-title">Soft Skills</div>
+        <div class="pills-wrap" id="soft-pills"></div>
+      </div>
+    </div>
+    <div class="skills-visual reveal reveal-delay-2" id="skills-bars"></div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="gallery-header">
+    <div class="section-label reveal" style="color:rgba(169,197,211,0.6)">— Portfolio Gallery</div>
+    <h2 class="gallery-headline reveal reveal-delay-1">Visual <em>Showcase</em></h2>
+    <p class="gallery-sub reveal reveal-delay-2">A glimpse into my world and working style.</p>
+  </div>
+  <div class="gallery-grid reveal reveal-delay-2" id="gallery-grid"></div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-left">
+    <div class="section-label contact-label reveal">— Get In Touch</div>
+    <h2 class="contact-headline reveal reveal-delay-1" id="contact-headline">Let's Work <em>Together</em></h2>
+    <p class="contact-sub reveal reveal-delay-2" id="contact-sub">Available for remote work, long-term partnerships, and one-time projects. Let's talk about how I can support your business.</p>
+    <div class="contact-items reveal reveal-delay-3">
+      <a class="contact-item" id="contact-email-link" href="#">
+        <div class="contact-item-icon">✉️</div>
+        <div>
+          <div class="contact-item-label">Email</div>
+          <div class="contact-item-value" id="contact-email-val">sky.kierla@gmail.com</div>
+        </div>
+      </a>
+      <a class="contact-item" id="contact-phone-link" href="#">
+        <div class="contact-item-icon">📞</div>
+        <div>
+          <div class="contact-item-label">Phone</div>
+          <div class="contact-item-value" id="contact-phone-val">+639943847983</div>
+        </div>
+      </a>
+      <div class="contact-item">
+        <div class="contact-item-icon">📍</div>
+        <div>
+          <div class="contact-item-label">Location</div>
+          <div class="contact-item-value" id="contact-location-val">Antipolo City, Philippines</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="contact-right reveal reveal-delay-2">
+    <div class="contact-card">
+      <div class="section-label contact-card-eyebrow">— Send a Message</div>
+      <h3 class="contact-card-title" id="contact-cta">Ready to get started?</h3>
+      <p class="contact-card-text">Fill out the form below and I'll get back to you within 24 hours.</p>
+      <div class="contact-form-field">
+        <input type="text" placeholder="Your Name" />
+      </div>
+      <div class="contact-form-field">
+        <input type="email" placeholder="Your Email" />
+      </div>
+      <div class="contact-form-field">
+        <textarea placeholder="Tell me about your project or needs…"></textarea>
+      </div>
+      <button class="contact-submit" id="contact-btn">Send Message ✦</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo" id="footer-logo">Kier Larga</div>
+  <div class="footer-copy" id="footer-copy">© 2025 Kier Vincent Larga. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#hero">Home</a>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+    <a href="admin/index.html">Admin</a>
+  </div>
+</footer>
+
+<script>
+const DATA_KEY = 'sky_portfolio_content';
+let content = null;
+
+async function loadContent() {
+  const local = localStorage.getItem(DATA_KEY);
+  if (local) {
+    try { content = JSON.parse(local); return; } catch(e) {}
+  }
+  try {
+    const r = await fetch('data/content.json');
+    content = await r.json();
+    localStorage.setItem(DATA_KEY, JSON.stringify(content));
+  } catch(e) {
+    console.warn('Could not load content.json, using defaults');
+    content = getDefaultContent();
+  }
+}
+
+function getDefaultContent() {
+  return {
+    hero: { name: 'Kier Vincent Larga', nickname: 'Sky', tagline: 'Virtual Assistant', intro: 'Turning chaos into clarity.', socials: { email: 'sky.kierla@gmail.com', phone: '+639943847983', location: 'Antipolo City, Philippines' } },
+    about: { headline: "Hello, I'm Sky.", description: 'Dedicated Virtual Assistant.', tags: [] },
+    services: [],
+    skills: { tools: [], soft: [] },
+    gallery: [],
+    contact: { headline: "Let's Work Together", subtext: 'Available for remote work.', email: 'sky.kierla@gmail.com', phone: '+639943847983', location: 'Antipolo City, Philippines', cta: 'Send Me a Message' }
+  };
+}
+
+function renderPage() {
+  const c = content;
+  // Hero
+  const nick = document.getElementById('hero-nickname');
+  if (nick) nick.textContent = c.hero.nickname || 'Sky';
+  const ht = document.getElementById('hero-tagline');
+  if (ht) ht.textContent = c.hero.tagline;
+  const hi = document.getElementById('hero-intro');
+  if (hi) hi.textContent = c.hero.intro;
+  const hl = document.getElementById('hero-location');
+  if (hl) hl.textContent = c.hero.socials?.location || '';
+
+  // Hero BG image
+  const heroBgEl = document.getElementById('hero-bg-img');
+  if (heroBgEl && c.hero.backgroundImage) {
+    heroBgEl.style.backgroundImage = `url('${c.hero.backgroundImage}')`;
+  }
+
+  // Hero profile image
+  const heroFrame = document.getElementById('hero-photo-frame');
+  if (heroFrame && c.hero.profileImage) {
+    heroFrame.innerHTML = `<img src="${c.hero.profileImage}" alt="${c.hero.nickname}" style="width:100%;height:100%;object-fit:cover;object-position:top" onerror="this.parentElement.innerHTML='<div class=hero-photo-placeholder><span>👤</span><p>Upload Profile Photo</p></div>'"/>`;
+  }
+
+  // Nav logo
+  const nl = document.getElementById('nav-logo');
+  if (nl) nl.textContent = c.hero.nickname + ' Larga';
+
+  // About
+  const ah = document.getElementById('about-headline');
+  if (ah) ah.innerHTML = c.about.headline.replace("I'm", "I'm").replace(/(Sky)/i, '<em>$1</em>');
+  const at = document.getElementById('about-text');
+  if (at) at.textContent = c.about.description;
+  const aboutFrame = document.getElementById('about-photo-frame');
+  if (aboutFrame && c.about.image) {
+    aboutFrame.innerHTML = `<img src="${c.about.image}" alt="About" style="width:100%;height:100%;object-fit:cover;object-position:top" onerror="this.parentElement.innerHTML='<div class=about-img-placeholder><span>🌊</span><p>About Photo</p></div>'"/>`;
+  }
+  const atags = document.getElementById('about-tags');
+  if (atags && c.about.tags?.length) {
+    atags.innerHTML = c.about.tags.map(t => `
+      <div class="about-tag">
+        <span class="about-tag-label">${t.value}</span>
+        <span class="about-tag-value">${t.label}</span>
+      </div>`).join('');
+  }
+
+  // Services
+  const sg = document.getElementById('services-grid');
+  if (sg && c.services?.length) {
+    sg.innerHTML = c.services.map((s, i) => `
+      <div class="service-card reveal" style="transition-delay:${i * 0.08}s">
+        <span class="service-icon">${s.icon}</span>
+        <span class="service-number">0${i+1}</span>
+        <h3 class="service-title">${s.title}</h3>
+        <p class="service-desc">${s.description}</p>
+      </div>`).join('');
+    observeReveal();
+  }
+
+  // Skills
+  const toolsPills = document.getElementById('tools-pills');
+  if (toolsPills && c.skills?.tools?.length) {
+    toolsPills.innerHTML = c.skills.tools.map(t => `<span class="skill-pill tool">${t}</span>`).join('');
+  }
+  const softPills = document.getElementById('soft-pills');
+  if (softPills && c.skills?.soft?.length) {
+    softPills.innerHTML = c.skills.soft.map(s => `<span class="skill-pill">${s}</span>`).join('');
+  }
+  // Skill bars
+  const sb = document.getElementById('skills-bars');
+  const skillData = [
+    { name: 'Calendar & Inbox Management', pct: 95 },
+    { name: 'Customer Support', pct: 92 },
+    { name: 'Google Workspace / MS Office', pct: 88 },
+    { name: 'Communication', pct: 96 },
+    { name: 'Problem-Solving', pct: 90 },
+    { name: 'Social Media Management', pct: 78 },
+  ];
+  if (sb) {
+    sb.innerHTML = skillData.map(sk => `
+      <div class="skill-bar-item reveal">
+        <div class="skill-bar-head">
+          <span class="skill-bar-name">${sk.name}</span>
+          <span class="skill-bar-pct">${sk.pct}%</span>
+        </div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" data-pct="${sk.pct}"></div></div>
+      </div>`).join('');
+  }
+
+  // Gallery
+  const gg = document.getElementById('gallery-grid');
+  if (gg) {
+    if (c.gallery?.length) {
+      gg.innerHTML = c.gallery.map((g,i) => `
+        <div class="gallery-item">
+          <img class="gallery-img" src="${g.src}" alt="${g.caption}" onerror="this.parentElement.innerHTML='<div class=gallery-placeholder><span>🖼️</span><p>Gallery ${i+1}</p></div><div class=gallery-caption>${g.caption}</div>'"/>
+          <div class="gallery-caption">${g.caption}</div>
+        </div>`).join('');
+    } else {
+      gg.innerHTML = [1,2,3,4,5].map(i => `
+        <div class="gallery-item">
+          <div class="gallery-placeholder"><span>🖼️</span><p>Gallery ${i}</p></div>
+          <div class="gallery-caption">Upload Photo ${i}</div>
+        </div>`).join('');
+    }
+  }
+
+  // Contact
+  const ch = document.getElementById('contact-headline');
+  if (ch) ch.innerHTML = `${c.contact.headline.split(' ').slice(0,-1).join(' ')} <em>${c.contact.headline.split(' ').slice(-1)}</em>`;
+  const cs = document.getElementById('contact-sub');
+  if (cs) cs.textContent = c.contact.subtext;
+  const ev = document.getElementById('contact-email-val');
+  if (ev) ev.textContent = c.contact.email;
+  const el = document.getElementById('contact-email-link');
+  if (el) el.href = `mailto:${c.contact.email}`;
+  const pv = document.getElementById('contact-phone-val');
+  if (pv) pv.textContent = c.contact.phone;
+  const pl = document.getElementById('contact-phone-link');
+  if (pl) pl.href = `tel:${c.contact.phone}`;
+  const lv = document.getElementById('contact-location-val');
+  if (lv) lv.textContent = c.contact.location;
+  const cbtn = document.getElementById('contact-btn');
+  if (cbtn) cbtn.textContent = (c.contact.cta || 'Send Message') + ' ✦';
+
+  // Footer
+  const fl = document.getElementById('footer-logo');
+  if (fl) fl.textContent = c.hero.nickname + ' Larga';
+}
+
+// Intersection observer for reveal
+function observeReveal() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // Animate skill bars
+        e.target.querySelectorAll && e.target.querySelectorAll('.skill-bar-fill').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+        if (e.target.classList.contains('skill-bar-item')) {
+          const bar = e.target.querySelector('.skill-bar-fill');
+          if (bar) bar.style.width = bar.dataset.pct + '%';
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+  els.forEach(el => obs.observe(el));
+}
+
+// Skill bar observer
+function observeSkillBars() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.skill-bar-fill').forEach(b => b.style.width = b.dataset.pct + '%');
+      }
+    });
+  }, { threshold: 0.3 });
+  const sb = document.getElementById('skills-bars');
+  if (sb) obs.observe(sb);
+}
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 50) nav.classList.add('scrolled');
+  else nav.classList.remove('scrolled');
+});
+
+// Contact form submit (demo)
+document.addEventListener('click', e => {
+  if (e.target.id === 'contact-btn') {
+    e.target.textContent = '✓ Message Sent!';
+    e.target.style.background = '#3A6EA5';
+    setTimeout(() => { e.target.textContent = (content?.contact?.cta || 'Send Message') + ' ✦'; e.target.style.background = ''; }, 3000);
+  }
+});
+
+// INIT
+(async () => {
+  await loadContent();
+  renderPage();
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('visible');
+    });
+    observeReveal();
+    observeSkillBars();
+  }, 100);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "siteTitle": "Kier Larga — Virtual Assistant",
+    "favicon": ""
+  },
+  "hero": {
+    "backgroundImage": "../assets/images/bg.jpg",
+    "profileImage": "../assets/images/profile.jpg",
+    "name": "Kier Vincent Larga",
+    "nickname": "Sky",
+    "tagline": "Virtual Assistant & Customer Support Specialist",
+    "intro": "Turning chaos into clarity — one inbox, calendar, and client at a time.",
+    "socials": {
+      "email": "sky.kierla@gmail.com",
+      "phone": "+639943847983",
+      "location": "Antipolo City, Philippines"
+    }
+  },
+  "about": {
+    "headline": "Hello, you can call me <em>Sky.</em>",
+    "description": "I'm a dedicated Virtual Assistant and Customer Support Specialist with over 1 year and 7 months of hands-on experience. I help entrepreneurs and businesses run smoother by taking care of the behind-the-scenes work — so you can focus on what truly matters. From inbox zero to flawlessly managed calendars, I bring precision, warmth, and a can-do attitude to every task.",
+    "image": "../assets/images/about.jpg",
+    "tags": [
+      { "label": "🇵🇭 Filipino", "value": "Nationality" },
+      { "label": "📍 Antipolo City", "value": "Based in" },
+      { "label": "💼 1.5+ Years", "value": "Experience" },
+      { "label": "🌐 English & Filipino", "value": "Languages" }
+    ]
+  },
+  "services": [
+    {
+      "id": "calendar",
+      "icon": "🗓️",
+      "title": "Calendar Management",
+      "description": "Scheduling appointments, setting reminders, coordinating time zones, and ensuring your days flow with intention and efficiency. No more double-bookings or missed meetings."
+    },
+    {
+      "id": "inbox",
+      "icon": "📬",
+      "title": "Inbox Management",
+      "description": "From filtering and labeling to drafting replies and flagging priorities — I keep your inbox clean, organized, and stress-free. Inbox zero is always the goal."
+    },
+    {
+      "id": "travel",
+      "icon": "✈️",
+      "title": "Travel Management",
+      "description": "Flight bookings, hotel reservations, itinerary planning, and ground transportation. Business travel handled from A to Z, so you can arrive ready and refreshed."
+    },
+    {
+      "id": "events",
+      "icon": "🎉",
+      "title": "Events Management",
+      "description": "Coordinating virtual or in-person events — from vendor communication to logistics, RSVPs, and timelines. Every detail accounted for, every moment memorable."
+    },
+    {
+      "id": "household",
+      "icon": "🏡",
+      "title": "Household Management",
+      "description": "Vendor scheduling, bill reminders, errand coordination, and household admin tasks. Your personal life, running like clockwork behind the scenes."
+    },
+    {
+      "id": "meeting",
+      "icon": "🤝",
+      "title": "Meeting Management",
+      "description": "Agenda preparation, meeting notes, action item tracking, and follow-up coordination. Every meeting ends with clarity and accountability."
+    },
+    {
+      "id": "socialmedia",
+      "icon": "📱",
+      "title": "Basic Social Media Management",
+      "description": "Scheduling posts, basic content curation, engagement monitoring, and keeping your brand presence consistent and professional across platforms."
+    }
+  ],
+  "skills": {
+    "tools": [
+      "Microsoft Office",
+      "Google Workspace",
+      "Gmail",
+      "Google Calendar",
+      "Google Drive",
+      "Slack",
+      "Zoom",
+      "Trello",
+      "Notion",
+      "Canva"
+    ],
+    "soft": [
+      "Written Communication",
+      "Verbal Communication",
+      "Problem-Solving",
+      "Time Management",
+      "Attention to Detail",
+      "Customer Service",
+      "Adaptability",
+      "Proactivity",
+      "Discretion",
+      "Billing Support"
+    ]
+  },
+  "gallery": [
+    { "src": "../assets/images/gallery1.jpg", "caption": "Workspace Essentials" },
+    { "src": "../assets/images/gallery2.jpg", "caption": "Organized & Ready" },
+    { "src": "../assets/images/gallery3.jpg", "caption": "Digital Workflow" },
+    { "src": "../assets/images/gallery4.jpg", "caption": "Behind the Scenes" },
+    { "src": "../assets/images/gallery5.jpg", "caption": "Always On" }
+  ],
+  "contact": {
+    "headline": "Let's Work Together",
+    "subtext": "Available for remote work, long-term partnerships, and one-time projects. Let's talk about how I can support your business.",
+    "email": "sky.kierla@gmail.com",
+    "phone": "+639943847983",
+    "location": "Antipolo City, Philippines",
+    "cta": "Send Me a Message"
+  }
+}
